@@ -18,10 +18,11 @@ public class MovieCatalogServiceApplication {
 	@Bean
 	public RestTemplate getRestTemplate() {
 		
-		HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
+		/*HttpComponentsClientHttpRequestFactory clientHttpRequestFactory = new HttpComponentsClientHttpRequestFactory();
 		clientHttpRequestFactory.setConnectTimeout(3000);
 		
-		return new RestTemplate(clientHttpRequestFactory);
+		return new RestTemplate(clientHttpRequestFactory);*/
+		return new RestTemplate();
 	}
 
 }

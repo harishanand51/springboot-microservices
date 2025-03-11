@@ -1,7 +1,5 @@
 package com.moviecatalogservice.resources;
 
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -13,8 +11,10 @@ import org.springframework.web.client.RestTemplate;
 
 import com.moviecatalogservice.models.CatalogItem;
 import com.moviecatalogservice.models.Movie;
-import com.moviecatalogservice.models.Rating;
 import com.moviecatalogservice.models.UserRating;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 
 @RestController
 @RequestMapping("/catalog")
@@ -24,6 +24,7 @@ public class CatalogResource {
 	private RestTemplate restTemplate;
 	
 	@RequestMapping("/{userId}")
+	@CircuitBreaker(name = "movieCatalogService", fallbackMethod = "getFallbackCatalog")
 	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 		
 		//return Collections.singletonList(new CatalogItem("Test", "Test Desc", 4));
@@ -43,5 +44,9 @@ public class CatalogResource {
 				})
 				.collect(Collectors.toList());
 	}
+	
+		public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId, Throwable t) {
+			return List.of(new CatalogItem("No Movie Available", "Fallback Response", 0));
+		}
 
 }
