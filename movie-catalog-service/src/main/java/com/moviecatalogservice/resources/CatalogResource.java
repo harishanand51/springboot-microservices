@@ -23,30 +23,32 @@ public class CatalogResource {
 	@Autowired
 	private RestTemplate restTemplate;
 	
+	@Autowired
+	MovieInfo movieInfo;
+	
+	@Autowired
+	UserRatingInfo userRatingInfo;
+	
 	@RequestMapping("/{userId}")
-	@CircuitBreaker(name = "movieCatalogService", fallbackMethod = "getFallbackCatalog")
+	//@CircuitBreaker(name = "movieCatalogService", fallbackMethod = "getFallbackCatalog")
 	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 		
-		//return Collections.singletonList(new CatalogItem("Test", "Test Desc", 4));
-		
-		/*List<Rating> ratingList =Arrays.asList(
-                                   new Rating("1234",3),
-                                   new Rating("5678",4)
-                                  );
-		*/
-		UserRating userRating = restTemplate.getForObject("http://ratings-data-service/ratingsdata/user/"+userId, UserRating.class);
+		UserRating userRating = userRatingInfo.getUserRating(userId);
+		//UserRating userRating = restTemplate.getForObject("http://ratings-data-service/ratingsdata/user/"+userId, UserRating.class);
 		
 		return userRating.getRatings().stream()
-				//.map(rating -> new CatalogItem("Name", "Desc", rating.getRating()))
+				.map(rating -> movieInfo.getCatalogItem(rating))
+				.collect(Collectors.toList());
+		/*return userRating.getRatings().stream()
 				.map(rating -> {
 					Movie movie = restTemplate.getForObject("http://movie-info-service/movies/"+rating.getMovieId(), Movie.class);
 					return new CatalogItem(movie.getName(),movie.getDescription(), rating.getRating());
 				})
-				.collect(Collectors.toList());
+				.collect(Collectors.toList());*/
 	}
 	
-		public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId, Throwable t) {
+		/*public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId, Throwable t) {
 			return List.of(new CatalogItem("No Movie Available", "Fallback Response", 0));
-		}
+		}*/
 
 }
