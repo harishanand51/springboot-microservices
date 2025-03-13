@@ -15,6 +15,7 @@ import com.moviecatalogservice.models.UserRating;
 import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
 
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.bulkhead.annotation.Bulkhead;
 
 @RestController
 @RequestMapping("/catalog")
@@ -30,7 +31,8 @@ public class CatalogResource {
 	UserRatingInfo userRatingInfo;
 	
 	@RequestMapping("/{userId}")
-	//@CircuitBreaker(name = "movieCatalogService", fallbackMethod = "getFallbackCatalog")
+	@CircuitBreaker(name = "movieCatalogService", fallbackMethod = "getFallbackCatalog")
+	@Bulkhead(name = "movieCatalogService", type = Bulkhead.Type.THREADPOOL)
 	public List<CatalogItem> getCatalog(@PathVariable("userId") String userId){
 		
 		UserRating userRating = userRatingInfo.getUserRating(userId);
@@ -47,8 +49,8 @@ public class CatalogResource {
 				.collect(Collectors.toList());*/
 	}
 	
-		/*public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId, Throwable t) {
+		public List<CatalogItem> getFallbackCatalog(@PathVariable("userId") String userId, Throwable t) {
 			return List.of(new CatalogItem("No Movie Available", "Fallback Response", 0));
-		}*/
+		}
 
 }
